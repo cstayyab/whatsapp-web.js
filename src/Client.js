@@ -65,7 +65,6 @@ class Client extends EventEmitter {
      * Sets up events and requirements, kicks off authentication request
      */
     async initialize() {
-        if(this.options.custom)
         const browser = (this.options.customPuppeteerInstance) ? this.options.customPuppeteerInstance : await puppeteer.launch(this.options.puppeteer);
         const page = (await browser.pages())[0];
         page.setUserAgent(this.options.userAgent);
@@ -73,7 +72,7 @@ class Client extends EventEmitter {
         this.pupBrowser = browser;
         this.pupPage = page;
 
-        if (this.options.session) {
+        if (this.options.session && this.options.customPuppeteerInstance == null) {
             await page.evaluateOnNewDocument(
                 session => {
                     localStorage.clear();
@@ -84,14 +83,17 @@ class Client extends EventEmitter {
                 }, this.options.session);
         }
 
-        await page.goto(WhatsWebURL, {
-            waitUntil: 'load',
-            timeout: 0,
-        });
+        if(this.options.customPuppeteerInstance == null) {
+            await page.goto(WhatsWebURL, {
+                waitUntil: 'load',
+                timeout: 0,
+            });
+        }
+        
 
         const KEEP_PHONE_CONNECTED_IMG_SELECTOR = '[data-asset-intro-image-light="true"], [data-asset-intro-image-dark="true"]';
 
-        if (this.options.session) {
+        if (this.options.session || this.options.customPuppeteerInstance) {
             // Check if session restore was successfull 
             try {
                 await page.waitForSelector(KEEP_PHONE_CONNECTED_IMG_SELECTOR, { timeout: this.options.authTimeoutMs });
@@ -115,7 +117,8 @@ class Client extends EventEmitter {
                 throw err;
             }
 
-        } else {
+        }
+        else {
             const getQrCode = async () => {
                 // Check if retry button is present
                 var QR_RETRY_SELECTOR = 'div[data-ref] > span > div';
