@@ -30,6 +30,7 @@ const { ClientInfo, Message, MessageMedia, Contact, Location, GroupNotification 
  * @param {number} options.takeoverTimeoutMs - How much time to wait before taking over the session
  * @param {string} options.userAgent - User agent to use in puppeteer
  * @param {string} options.ffmpegPath - Ffmpeg path to use when formating videos to webp while sending stickers 
+ * @param {string} options.customPuppeteerInstance - Custom Puppeteer Instance to use
  * 
  * @fires Client#qr
  * @fires Client#authenticated
@@ -64,7 +65,8 @@ class Client extends EventEmitter {
      * Sets up events and requirements, kicks off authentication request
      */
     async initialize() {
-        const browser = await puppeteer.launch(this.options.puppeteer);
+        if(this.options.custom)
+        const browser = (this.options.customPuppeteerInstance) ? this.options.customPuppeteerInstance : await puppeteer.launch(this.options.puppeteer);
         const page = (await browser.pages())[0];
         page.setUserAgent(this.options.userAgent);
 
