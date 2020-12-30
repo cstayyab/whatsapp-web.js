@@ -83,7 +83,7 @@ class Client extends EventEmitter {
                 }, this.options.session);
         }
 
-        if(this.options.customPuppeteerInstance == null) {
+        if(this.options.customPuppeteerInstance == null || page.url != WhatsWebURL) {
             await page.goto(WhatsWebURL, {
                 waitUntil: 'load',
                 timeout: 0,
